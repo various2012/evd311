@@ -1,3 +1,3 @@
 This version of display use ROOT EVE Display as template for application.
 
-Launch with: root -l
+Launch with: root -l evd311.C+
