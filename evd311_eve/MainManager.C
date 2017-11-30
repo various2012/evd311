@@ -45,16 +45,19 @@ private:
 	EventManager * fEventManager;
 	TGNumberEntryField * fEntryField;
 	TGLabel * fNumEvtLabel;
-	void MakeEvtGui();
+	void MakeEvtGui();//Make gui for event control
 ;
 	//void HandleButtonsEvt();
 	//TEveManager * fEveMan;
 public:
 	MainManager(UInt_t w, UInt_t h);
 	~MainManager();
-	void ReloadTree(TGListTreeItem * item, Int_t btn);
-	void SetEntryValue() {fEntryField->SetIntNumber(fEventManager->GetCurrentEvent());fEventCount->SetText(TString::Format("Event %li",fEntryField->GetIntNumber()));};
-	void EntryPressed() {fEventManager->GotoEvent(fEntryField->GetIntNumber());};
+	void ReloadTree(TGListTreeItem * item, Int_t btn); //Load tree according to chosen file
+	void SetEntryValue() {//Set current event(entry) at screen and entry field
+		fEntryField->SetIntNumber(fEventManager->GetCurrentEvent());
+		fEventCount->SetText(TString::Format("Event %li",fEntryField->GetIntNumber()));
+	};
+	void EntryPressed() {fEventManager->GotoEvent(fEntryField->GetIntNumber());}; //Slot for entry field
 	
 
 	//void LoadFile();
@@ -82,8 +85,7 @@ fNumEvtLabel(0)
 	fAxis = EvdUtils::MakeAxis("Axis",15,7,7);
 	fEventCount=EvdUtils::EventCount(GetDefaultGLViewer());
 	fCurTree=new TTree();
-	fFileBrowser=fBrowser->fFileBrowser;
-	fFileBrowser->fListTree->Connect("DoubleClicked(TGListTreeItem * , Int_t )","MainManager",this,"ReloadTree(TGListTreeItem * , Int_t )");
+
 	fEventManager = new EventManager("Event_is_not_loaded");
 	AddEvent(fEventManager);
 	SetCurrentEvent(fEventManager);
@@ -93,7 +95,10 @@ fNumEvtLabel(0)
 	//AddGlobalElement(fEveCount);
 	GetDefaultGLViewer()->CurrentCamera().SetCenterVec(150,0,0);
 	MakeEvtGui();
+
 	FullRedraw3D();
+	fFileBrowser=fBrowser->fFileBrowser;
+	fFileBrowser->fListTree->Connect("DoubleClicked(TGListTreeItem * , Int_t )","MainManager",this,"ReloadTree(TGListTreeItem * , Int_t )");
 	//GetMainWindow()->MapWindow();
 
 	
