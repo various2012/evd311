@@ -19,6 +19,7 @@
 #include <TGLabel.h>
 #include <TGTab.h>
 #include <TGDimension.h>
+#include <TEveViewer.h>
 //class TGlabel;
 
 #ifdef __MAKECINT__
@@ -45,8 +46,9 @@ private:
 	EventManager * fEventManager;
 	TGNumberEntryField * fEntryField;
 	TGLabel * fNumEvtLabel;
+	TEveViewer *fProjectionViewer;
 	void MakeEvtGui();//Make gui for event control
-;
+
 	//void HandleButtonsEvt();
 	//TEveManager * fEveMan;
 public:
@@ -59,7 +61,7 @@ public:
 	};
 	void EntryPressed() {fEventManager->GotoEvent(fEntryField->GetIntNumber());}; //Slot for entry field
 	
-
+	void LoadCurrentFile();
 	//void LoadFile();
 
 	ClassDef(MainManager,0);
@@ -94,11 +96,12 @@ fNumEvtLabel(0)
 	AddGlobalElement(fAxis);
 	//AddGlobalElement(fEveCount);
 	GetDefaultGLViewer()->CurrentCamera().SetCenterVec(150,0,0);
+	
 	MakeEvtGui();
 
 	FullRedraw3D();
-	fFileBrowser=fBrowser->fFileBrowser;
-	fFileBrowser->fListTree->Connect("DoubleClicked(TGListTreeItem * , Int_t )","MainManager",this,"ReloadTree(TGListTreeItem * , Int_t )");
+	// fFileBrowser=fBrowser->fFileBrowser;
+	// fFileBrowser->fListTree->Connect("DoubleClicked(TGListTreeItem * , Int_t )","MainManager",this,"ReloadTree(TGListTreeItem * , Int_t )");
 	//GetMainWindow()->MapWindow();
 
 	
@@ -151,7 +154,11 @@ void MainManager::MakeEvtGui(){
 	
 	TGHorizontalFrame * fFrame = new TGHorizontalFrame(cont,400,400);
 	fFrame->SetName("fFrame");
-
+    TGTextButton * bLoadEvent = new TGTextButton(fFrame, "Load");
+	bLoadEvent->SetWidth(35);
+	bLoadEvent->SetHeight(20);
+	bLoadEvent->Connect("Clicked()","MainManager",this,"LoadCurrentFile()");
+	fFrame->AddFrame(bLoadEvent,new TGLayoutHints(kLHintsNormal));
 	TGPictureButton * bPrev = new TGPictureButton(fFrame, gClient->GetPicture("arrow_left.xpm"),kPrevEvent);
 	bPrev->Connect("Clicked()", "EventManager", fEventManager,"PrevEvent()");
 	bPrev->Connect("Clicked()", "MainManager", this,"SetEntryValue()");
@@ -186,6 +193,9 @@ void MainManager::MakeEvtGui(){
 	//cont->MapSubwindows();
 	//cont->Resize();
 	//cont->Layout();
+	// ----------------------------------------------------
+	fProjectionViewer = SpawnNewViewer("projection", "pepe-");
+	//gPad->SetViewer3D(fProjectionViewer->GetGLViewer());
 	ctab->MapSubwindows();
 	ctab->Layout();
 //	evtMain->MapSubwindows();
@@ -198,6 +208,22 @@ void MainManager::MakeEvtGui(){
 	
 }
 
+void MainManager::LoadCurrentFile(){
+	if(!gFile) return;
+	fCurTree=(TTree*) gFile->Get("analysistree/anatree");
+	if(!fCurTree) return;
+	fEventManager->SetCurrentTree(fCurTree);
+	//fEventManager->GotoEvent(0);	
+	Int_t nEntries=fCurTree->GetEntries();
+	fEntryField->SetText("0",kTRUE);
+	fEntryField->SetLimits(TGNumberFormat::kNELLimitMinMax,0,nEntries-1);
+
+
+	fNumEvtLabel->SetText(TString::Format("/%i",nEntries-1));
+	fNumEvtLabel->Resize(fNumEvtLabel->GetDefaultSize());
+	EntryPressed();
+	FullRedraw3D();
+}
 //void MainManager::SetEntryValue(){
 //	fEntryField->SetIntNumber(fEventManager->GetCurrentEvent());
 //}
