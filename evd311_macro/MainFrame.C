@@ -168,7 +168,7 @@ enum kButtonsID{
 MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h) :
  TGMainFrame(p,w,h),fChain(0),selc(0),ncurent(0),fCurTree(0)
 {
-	gStyle->SetCanvasPreferGL(kTRUE);
+	//gStyle->SetCanvasPreferGL(kTRUE);
 	gStyle->SetOptStat(0);
 	fChain=new TChain("analysistree/anatree");
 	TGLayoutHints * mfr = new TGLayoutHints(kLHintsExpandX|kLHintsExpandY, 2,2,2,2);
